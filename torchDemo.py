@@ -1,66 +1,69 @@
 import torch
-import torch.nn as nn
-from torch.nn import functional as F 
+from torch import nn
 
-
-
-
-
-
-def embedding():
-    embedding = nn.Embedding(10, 3)
-    input = torch.LongTensor([[1, 2, 4, 5], [4, 3, 2, 9]])
-
-    print(input)
-    print(embedding(input))
-
-
-
-def tensor_view():
-    t = torch.rand(4, 4)
-    print(t)
-    b = t.view(2,8)
-    print(b)
-    print(t.storage().data_ptr() == b.storage().data_ptr())
-
- 
-
-def tril():
-    torch.manual_seed(1337)
-    B,T,C = 4,8,32
-    x = torch.randn(B,T,C)
-
-    head_size = 6
-    key = nn.Linear(C, head_size, bias=False)
-    query = nn.Linear(C, head_size, bias=False)
-    k = key(x)
-    q = query(x)
-    wei = q @ k.transpose(-2, -1)
-
-
-    tril = torch.tril(torch.ones(T, T))
-    # wei = torch.zeros((T,T))
-    wei = wei.masked_fill(tril==0, float('-inf'))
-    wei = F.softmax(wei, dim=-1)
-    out = wei @ x
-    print(out.shape)
-    print(wei[0])
-
-def transpose():    
-    x = torch.randn(2, 3)
+def flatten():
+    x = torch.randn(10,2,2,3)
     print(x)
-    print(x.ndim)
-    print(torch.transpose(x, -2, 1))
+    flatten = nn.Flatten()
+    y = flatten(x)
+    print(y)
+    print(y.shape)
+
+def softmax():
+    m = nn.Softmax(dim=1)
+    input = torch.randn(2,3)
+    print(input)
+    output = m(input)
+    print(output)
 
 
-def t():
-    B,T,C = 4,8,32
-    head_size = 6
-    k = torch.randn(B,T,head_size)
-    q = torch.randn(B,T,head_size)
-    wei = q @ k.transpose(-2, -1)  * head_size**-0.5
-    print(k.var())
-    print(q.var())
-    print(wei.var())
-    print(torch.softmax(torch.tensor([0.1,-0.2,0.3,-0.2,0.5]), dim =-1))
-t()
+def relu():
+    m = nn.ReLU()
+    input = torch.randn(2)
+    print(input)
+    output = m(input)
+    print(output)
+
+def relu2():
+    m = nn.ReLU()
+    input = torch.randn(2).unsqueeze(0)
+    print(input)
+    output = torch.cat((m(input), m(-input)))
+    print(output)
+
+# 张量维度比较绕
+def unsqueeze():
+    x = torch.tensor([1,2,3,4])
+    print(x)
+    x1 = torch.unsqueeze(x,0)
+    print(x1)
+    x2 = torch.unsqueeze(x,1)
+    print(x2)
+    # 这里会出错
+    # x3 = torch.unsqueeze(x,2)
+    # print(x3)
+
+def crossEntropyLoss():
+    loss = nn.CrossEntropyLoss()
+    input = torch.randn(3,5, requires_grad=True)
+    print(input)
+    target = torch.empty(3, dtype = torch.long).random_(5)
+    print(target)
+    output = loss(input, target)
+    print(output)
+    b = output.backward()
+    print(b)
+
+def crossEntropyLoss2():
+    # 创建一个 CrossEntropyLoss 对象
+    criterion = nn.CrossEntropyLoss()
+    # 假设我们有一个二分类问题，batch_size=3
+    outputs = torch.randn(3, 2)  # 模型的输出
+    targets = torch.tensor([0, 1, 0])  # 目标类别 
+    # 计算损失
+    print(outputs)
+    print(targets)
+    loss = criterion(outputs, targets) 
+    print(loss)
+        
+crossEntropyLoss2()    
